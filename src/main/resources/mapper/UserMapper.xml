@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.alex.ni.mybatis.dao.UserDao">
+
+    <resultMap type="com.alex.ni.mybatis.entity.User" id="UserResultMap">
+        <result property="id" column="id" jdbcType="INTEGER"/>
+        <result property="account" column="account" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="password" column="password" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="table_field">
+      id, account, name, password      
+    </sql>
+       
+    <!--通过Id查询单个-->
+    <select id="getById" resultMap="UserResultMap" parameterType="java.lang.Long">
+        select
+          <include refid="table_field" />
+        from user
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+
+    <!--通过实体不为空的属性作为筛选条件查询列表-->
+    <select id="listByEntity" resultMap="UserResultMap" parameterType="com.alex.ni.mybatis.entity.User">
+        select
+          <include refid="table_field" />
+        from user
+        <where>
+            <if test="id != null">
+                and id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="account != null">
+                and account = #{account,jdbcType=VARCHAR}
+            </if>
+            <if test="name != null">
+                and name = #{name,jdbcType=VARCHAR}
+            </if>
+            <if test="password != null">
+                and password = #{password,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--通过实体不为空的属性作为筛选条件查询单个-->
+    <select id="getByEntity" resultMap="UserResultMap" parameterType="com.alex.ni.mybatis.entity.User">
+        select
+          <include refid="table_field" />
+        from user
+        <where>
+            <if test="id != null">
+                and id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="account != null">
+                and account = #{account,jdbcType=VARCHAR}
+            </if>
+            <if test="name != null">
+                and name = #{name,jdbcType=VARCHAR}
+            </if>
+            <if test="password != null">
+                and password = #{password,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+
+    <!--通过Id列表作为筛选条件查询列表，列表长度不为0-->
+    <select id="listByIds" resultMap="UserResultMap" parameterType="list">
+        select
+          <include refid="table_field" />
+        from user
+        where id in
+        <foreach item="item" collection="list" separator="," open="(" close=")" index="index">
+            #{item}
+        </foreach>
+    </select>
+
+    <!--新增实体属性不为null的列-->
+    <insert id="insert" keyProperty="id" useGeneratedKeys="true" parameterType="com.alex.ni.mybatis.entity.User">
+        insert into user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+          <if test="id != null">
+             id,
+          </if>
+          <if test="account != null">
+             account,
+          </if>
+          <if test="name != null">
+             name,
+          </if>
+          <if test="password != null">
+             password,
+          </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+          <if test="id != null">
+             #{id,jdbcType=INTEGER},
+          </if>
+          <if test="account != null">
+             #{account,jdbcType=VARCHAR},
+          </if>
+          <if test="name != null">
+             #{name,jdbcType=VARCHAR},
+          </if>
+          <if test="password != null">
+             #{password,jdbcType=VARCHAR},
+          </if>
+        </trim>
+    </insert>
+
+    <!--批量新增所有列，列表长度不能为0，且列表id统一为null或者统一不为null-->
+    <insert id="insertBatch" keyProperty="id" useGeneratedKeys="true" parameterType="list">
+        insert into user
+         (id, account, name, password)
+        values
+        <foreach item="item" collection="list" separator="," open="" close="" index="index">
+         (#{item.id}, #{item.account}, #{item.name}, #{item.password})
+        </foreach>
+    </insert>
+
+    <!--通过主键修改实体属性不为null的列-->
+    <update id="update" parameterType="com.alex.ni.mybatis.entity.User">
+        update user
+        <set>
+            <if test="account != null and account != ''">
+                account = #{account,jdbcType=VARCHAR},
+            </if>
+            <if test="name != null and name != ''">
+                name = #{name,jdbcType=VARCHAR},
+            </if>
+            <if test="password != null and password != ''">
+                password = #{password,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--通过表字段修改实体属性不为null的列-->
+    <update id="updateByField">
+        update user
+        <set>
+            <if test="where.account == null and set.account != null and set.account != ''">
+                account = #{set.account,jdbcType=VARCHAR},
+            </if>
+            <if test="where.name == null and set.name != null and set.name != ''">
+                name = #{set.name,jdbcType=VARCHAR},
+            </if>
+            <if test="where.password == null and set.password != null and set.password != ''">
+                password = #{set.password,jdbcType=VARCHAR},
+            </if>
+        </set>
+        <where>
+            <if test="where.id != null">
+                and id = #{where.id,jdbcType=INTEGER}
+            </if>
+            <if test="where.account != null">
+                and account = #{where.account,jdbcType=VARCHAR}
+            </if>
+            <if test="where.name != null">
+                and name = #{where.name,jdbcType=VARCHAR}
+            </if>
+            <if test="where.password != null">
+                and password = #{where.password,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </update>
+
+    <!--通过主键修改实体列表，列表长度不能为0，注意：当实体属性为null时，对应的列也会别更新为null-->
+    <update id="updateBatch" parameterType="list">
+        update user
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="account = case" suffix="end,">
+                 <foreach collection="list" item="item" index="index">
+                  when id = #{item.id} then #{item.account}
+                 </foreach>
+            </trim>
+            <trim prefix="name = case" suffix="end,">
+                 <foreach collection="list" item="item" index="index">
+                  when id = #{item.id} then #{item.name}
+                 </foreach>
+            </trim>
+            <trim prefix="password = case" suffix="end,">
+                 <foreach collection="list" item="item" index="index">
+                  when id = #{item.id} then #{item.password}
+                 </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach collection="list" index="index" item="item" separator="," open="(" close=")">
+            #{item.id,jdbcType=INTEGER}
+        </foreach>
+    </update>
+    
+    <!--通过主键删除-->
+
+    <delete id="deleteById" parameterType="java.lang.Long">
+        delete from user where id = #{id,jdbcType=INTEGER}
+    </delete>
+
+    <!--通过实体非空属性删除-->
+    <delete id="deleteByEntity" parameterType="com.alex.ni.mybatis.entity.User">
+        delete from user
+        <where>
+            <if test="account != null">
+                and account = #{account,jdbcType=VARCHAR}
+            </if>
+            <if test="name != null">
+                and name = #{name,jdbcType=VARCHAR}
+            </if>
+            <if test="password != null">
+                and password = #{password,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </delete>
+    
+    <!--通过主键列表删除，列表长度不能为0-->
+    <delete id="deleteByIds" parameterType="list">
+        delete from user where id in
+        <foreach item="item" collection="list" separator="," open="(" close=")" index="index">
+            #{item}
+        </foreach>
+    </delete>
+    
+    <select id="countAll" resultType="int">
+        select count(*) from user
+    </select>
+    
+    <select id="countByEntity" parameterType="com.alex.ni.mybatis.entity.User" resultType="int">
+        select count(*) from user
+        <where>
+            <if test="id != null">
+                and id = #{id,jdbcType=INTEGER}
+            </if>
+            <if test="account != null">
+                and account = #{account,jdbcType=VARCHAR}
+            </if>
+            <if test="name != null">
+                and name = #{name,jdbcType=VARCHAR}
+            </if>
+            <if test="password != null">
+                and password = #{password,jdbcType=VARCHAR}
+            </if>
+        </where>
+    </select>
+</mapper>
